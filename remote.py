@@ -29,7 +29,7 @@ if _use_tcp:
     # For linux hosts all sockets that want to share the same address and port combination must belong to processes that share the same effective user ID!
     # So, on linux(kernel>=3.9) you have to run multiple servers and clients under one user to share the same (host, port).
     # Thanks to @stevenreddie
-    _ad_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    #_ad_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
 
     # Enable broadcasting mode
     _ad_server.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)

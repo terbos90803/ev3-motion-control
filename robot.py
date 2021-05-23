@@ -74,13 +74,39 @@ def lift_down():
     liftMotor.stop()
 
 
+def ramp_motor(sp):
+    spinMotor.duty_cycle_sp = sp
+    t = time.time()
+    at = t
+    ma = 0
+    a0 = a1 = 0.0
+    last_ms = time.time() * 1000.0
+    s = spinMotor.speed
+    while time.time() - t < 1.0:
+        now_ms = time.time() * 1000.0
+        while now_ms - last_ms < 1.0:
+            now_ms = time.time() * 1000.0
+        dt = now_ms - last_ms
+        last_ms = now_ms
+        cs = spinMotor.speed
+        a = (cs - s) / dt
+        s = cs
+        af = max(a, a0)
+        af = min(af, a1)
+        a1 = a0
+        a0 = a
+        ma = max(ma, abs(af))
+        #debug_print(a)
+        if abs(af) > 1.0:
+            at = time.time()
+    debug_print('speed: {:4}   accel time: {:.1f}   max accel: {:.1f}'.format(s, (at-t)*1000.0, ma))
+
+
 def spin_test():
     spinMotor.run_direct()
     while True:
-        spinMotor.duty_cycle_sp = 100
-        time.sleep(1)
-        spinMotor.duty_cycle_sp = 50
-        time.sleep(1)
+        ramp_motor(100)
+        ramp_motor(50)
 
 
 leds = Leds()
