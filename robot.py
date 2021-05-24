@@ -83,20 +83,37 @@ def ramp_motor(sp):
     last_ms = time.time() * 1000.0
     s = spinMotor.speed
     while time.time() - t < 1.0:
+        # when is now?
         now_ms = time.time() * 1000.0
+        # don't sample more frequently than 1000Hz
         while now_ms - last_ms < 1.0:
             now_ms = time.time() * 1000.0
+        # how long since the last sample?
         dt = now_ms - last_ms
         last_ms = now_ms
+        # how fast is the motor going?
         cs = spinMotor.speed
+        # acceleration = change in velocity over time
         a = (cs - s) / dt
         s = cs
-        af = max(a, a0)
-        af = min(af, a1)
+        # median filter the acceleration
+        # 3 samples are in age order: a, a0, a1
+        # step 1: sort two into increasing order
+        if a0 < a1:
+            al = a0
+            ah = a1
+        else:
+            al = a1
+            ah = a0
+        # bubble the third into the set and pick the middle
+        af = max(a, al)
+        af = min(af, ah)
+        # age the sample history
         a1 = a0
         a0 = a
+        # capture the max accel so far
         ma = max(ma, abs(af))
-        #debug_print(a)
+        # note the time when the velocity has stabilized
         if abs(af) > 1.0:
             at = time.time()
     debug_print('speed: {:4}   accel time: {:.1f}   max accel: {:.1f}'.format(s, (at-t)*1000.0, ma))
